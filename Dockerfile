@@ -1,2 +1,2 @@
-FROM nginx:1.24-alpine
-COPY . /usr/share/nginx/html
+ROM nginx:alpine
+COPY src /usr/share/nginx/html
