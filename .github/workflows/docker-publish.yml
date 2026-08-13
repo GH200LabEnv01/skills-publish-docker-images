@@ -1,26 +1,33 @@
-name: Docker Publish
-
+name: Publish to Docker
 on:
   push:
     branches:
       - main
-
 permissions:
-  contents: read
   packages: write
-
+  contents: read
 jobs:
-  build-and-push:
+  publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - name: Log in to the Container registry
+      - name: Checkout
+        uses: actions/checkout@v4
+      # Add your test steps here if needed...
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/rajeshgogia/publish-packages/game
+          tags: type=sha
+      - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: {% raw %}${{ github.actor }}{% endraw %}
-          password: {% raw %}${{ secrets.GITHUB_TOKEN }}{% endraw %}
-      - name: Build and push Docker image
-        run: |
-          docker build . --tag ghcr.io/{{ full_repo_name | lower }}/stackoverflown:main
-          docker push ghcr.io/{{ full_repo_name | lower }}/stackoverflown:main
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build container
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
